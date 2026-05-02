@@ -1,17 +1,10 @@
-# ================================================================
-# Makefile — Processador RISCO em SystemC
-# ================================================================
-# Pré-requisito: SystemC instalado
-# Ubuntu/Debian: sudo apt install libsystemc-dev
-# ================================================================
-
 SYSTEMC_HOME ?= /usr/local/systemc-2.3.3
 CXX          = g++
 CXXFLAGS     = -std=c++17 -Wall -O2
 INCLUDES     = -I$(SYSTEMC_HOME)/include -I.
 LDFLAGS      = -L$(SYSTEMC_HOME)/lib-linux64 -lsystemc -lm
 
-# Tenta detectar instalação via apt (libsystemc-dev)
+# Detectar instalação 
 SYSTEMC_APT  = /usr/include/systemc
 ifneq ($(wildcard $(SYSTEMC_APT)),)
   INCLUDES   = -I/usr/include -I.

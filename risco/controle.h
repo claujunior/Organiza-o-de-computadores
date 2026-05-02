@@ -7,10 +7,10 @@
  * Formato de instrução RISCO (32 bits) — máquina 3 endereços:
  *
  * Tipo R (registrador):
- *  [31:28] opcode | [27:24] rd | [23:20] rs1 | [19:16] rs2 | [15:0] não usado
+ *  [31-28] opcode | [27-24] rd | [23-20] rs1 | [19-16] rs2 | [15-0] não usado
  *
  * Tipo I (imediato):
- *  [31:28] opcode | [27:24] rd | [23:20] rs1 | [19:0] imediato (20 bits)
+ *  [31-28] opcode | [27-24] rd | [23-20] rs1 | [19-0] imediato (20 bits)
  *
  * Opcodes:
  *  0000 = ADD   (R)

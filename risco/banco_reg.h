@@ -3,8 +3,8 @@
 
 #include <systemc.h>
 
-// O RISCO possui 16 registradores de uso geral (R0..R15)
-// R0 é sempre 0 (hardwired zero)
+// Possui 16 registradores (R0..R15)
+// R0 é sempre 0 
 // RA (R14) = registrador de retorno
 // RB (R15) = base pointer / stack pointer
 

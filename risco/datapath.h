@@ -11,15 +11,17 @@ SC_MODULE(Datapath) {
     sc_in<bool> clk;
     sc_in<bool> reset;
 
-    // =========================================================
     // Sinais internos
     // =========================================================
 
     // PC
     sc_signal<sc_uint<32>> pc, pc_next, pc_plus1;
 
-    // Instrução
+    // Instrução (Estágio Busca - IF)
     sc_signal<sc_uint<32>> instrucao;
+    
+    // Registrador de Pipeline (Barreira IF/EX)
+    sc_signal<sc_uint<32>> if_ex_instrucao; 
 
     // Campos decodificados
     sc_signal<sc_uint<4>>  sig_opcode, sig_rd, sig_rs1, sig_rs2;
@@ -43,7 +45,6 @@ SC_MODULE(Datapath) {
     // Write-back
     sc_signal<sc_uint<32>> sig_wb_data;
 
-    // =========================================================
     // Instâncias dos módulos
     // =========================================================
     UnidadeControle *ctrl;
@@ -61,7 +62,8 @@ SC_MODULE(Datapath) {
         mem_dados      = new Memoria("mem_dados");
 
         // --- Unidade de Controle ---
-        ctrl->instrucao(instrucao);
+        // Lê do registrador de pipeline em vez da saída direta da memória
+        ctrl->instrucao(if_ex_instrucao); 
         ctrl->opcode(sig_opcode);
         ctrl->rd(sig_rd);
         ctrl->rs1(sig_rs1);
@@ -121,7 +123,7 @@ SC_MODULE(Datapath) {
         SC_METHOD(calc_pc_next);
         sensitive << pc << sig_zero << sig_branch << sig_jump << sig_imm;
 
-        // --- Processo síncrono: atualiza PC ---
+        // --- Processo síncrono: atualiza PC e Pipeline ---
         SC_METHOD(atualiza_pc);
         sensitive << clk.pos();
     }
@@ -156,12 +158,23 @@ SC_MODULE(Datapath) {
         }
     }
 
-    // Atualiza PC na borda do clock
+    // Atualiza PC e Pipeline na borda do clock
     void atualiza_pc() {
-        if (reset.read())
+        if (reset.read()) {
             pc.write(0);
-        else
+            if_ex_instrucao.write(0); // Limpa o pipeline no reset
+        } else {
             pc.write(pc_next.read());
+            
+            // Tratamento de Hazard de Controle (Flush)
+            if (sig_jump.read() || (sig_branch.read() && sig_zero.read())) {
+                // Se houve pulo, a instrução logo atrás é descartada 
+                if_ex_instrucao.write(0); 
+            } else {
+                // Caso contrário, a instrução buscada avança para Execução
+                if_ex_instrucao.write(instrucao.read());
+            }
+        }
     }
 
     // Método auxiliar para carregar programa na memória de instruções
