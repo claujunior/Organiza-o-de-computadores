@@ -2,9 +2,7 @@
 
 ## Arquitetura
 
-Implementação do **datapath básico** do processador RISCO (RISC em português),
-baseada no livro *Organização de Computadores* (RISCO.pdf), Figura 3.1 —
-Diagrama de Blocos da PO (Parte Operativa).
+Implementação do **datapath básico** do processador RISCO.
 
 ### Organização dos Módulos
 
