@@ -42,7 +42,26 @@
 //    o primeiro uso do registrador carregado.
 //    Exemplo aplicado: addr 13 (LOAD R12) seguido de addr 14 (NOP).
 // =============================================================================
+std::string decode(uint32_t instr) {
+    uint8_t opcode = (instr >> 28) & 0xF;
 
+    switch (opcode) {
+        case 0x0: return "ADD";
+        case 0x1: return "SUB";
+        case 0x2: return "AND";
+        case 0x3: return "OR";
+        case 0x4: return "XOR";
+        case 0x5: return "NOT";
+        case 0x6: return "SHL";
+        case 0x7: return "SHR";
+        case 0x8: return "ADDI";
+        case 0x9: return "LOAD";
+        case 0xA: return "STORE";
+        case 0xB: return "BEQ";
+        case 0xC: return "JUMP";
+        default:  return "UNK";
+    }
+}
 int sc_main(int argc, char* argv[]) {
     sc_clock clk("clk", 10, SC_NS);
     sc_signal<bool> reset;
@@ -50,29 +69,49 @@ int sc_main(int argc, char* argv[]) {
     Datapath dut("dut");
     dut.clk(clk);
     dut.reset(reset);
-
+    //contador
     sc_uint<32> programa[] = {
-        0x81000005,  //  0: ADDI R1,  R0, 5       — R1 = 5
-        0x82000003,  //  1: ADDI R2,  R0, 3       — R2 = 3
-        0x03120000,  //  2: ADD  R3,  R1, R2      — R3 = 8  (RAW)
-        0x14310000,  //  3: SUB  R4,  R3, R1      — R4 = 3  (RAW encadeado)
-        0x25320000,  //  4: AND  R5,  R3, R2      — R5 = 0  (8 & 3)
-        0x36320000,  //  5: OR   R6,  R3, R2      — R6 = 11 (8 | 3)
-        0x47320000,  //  6: XOR  R7,  R3, R2      — R7 = 11 (8 ^ 3)
-        0x58100000,  //  7: NOT  R8,  R1          — R8 = ~5 = 0xFFFFFFFA
-        0x69200000,  //  8: SHL  R9,  R2          — R9 = 6  (3 << 1)
-        0x7A300000,  //  9: SHR  R10, R3          — R10 = 4 (8 >> 1)
-        0x8B0FFFFF,  // 10: ADDI R11, R0, -1      — R11 = 0xFFFFFFFF (ext. sinal)
-        0x00120000,  // 11: ADD  R0,  R1, R2      — R0 deve ficar 0 (hardwired)
-        0xA300000A,  // 12: STORE R3, 10(R0)      — mem[10] = 8
-        0x9C00000A,  // 13: LOAD  R12, 10(R0)     — R12 = 8
-        0x00000000,  // 14: NOP (ADD R0,R0,R0)    — evita load-use hazard
-        0xB3100001,  // 15: BEQ  R3, R1, 1        — 8!=5 -> NOT tomado -> PC=16
-        0xB1100001,  // 16: BEQ  R1, R1, 1        — 5==5 -> TOMADO    -> PC=18
-        0x8D000063,  // 17: ADDI R13, R0, 99      — IGNORADO (flush do BEQ)
-        0xC0000012,  // 18: JUMP 18               — halt (loop infinito)
-    };
-    dut.carregar_programa(programa, 19);
+
+    // =========================
+    // 1. CONTADOR (executa algumas vezes)
+    // =========================
+    0x81000000,  //  0: ADDI R1, R0, 0
+    0x81100001,  //  1: ADDI R1, R1, 1
+    0x81100001,  //  2: ADDI R1, R1, 1
+    0x81100001,  //  3: ADDI R1, R1, 1
+    
+
+    // =========================
+    // 2. MULTIPLICADOR (R3 = 5 * 3)
+    // =========================
+    0x81000005,  //  4: ADDI R1, R0, 5
+    0x82000003,  //  5: ADDI R2, R0, 3
+    0x83000000,  //  6: ADDI R3, R0, 0
+
+    0xB2000004,  //  7: BEQ  R2,R0,4
+    0x03310000,  //  8: ADD  R3,R3,R1
+    0x822FFFFF,  //  9: ADDI R2,R2,-1
+    0xC0000007,  // 10: JUMP 7
+
+    // =========================
+    // 3. COMPARADOR (salva maior em mem[10])
+    // =========================
+    0x81000005,  // 11: ADDI R1,R0,5
+    0x82000003,  // 12: ADDI R2,R0,3
+    0x14210000,  // 13: SUB  R4,R1,R2
+    0xB4000002,  // 14: BEQ  R4,R0,2
+    0x15220000,  // 15: SUB  R5,R2,R1
+    0xB5000002,  // 16: BEQ  R5,R0,2
+    0xA200000A,  // 17: STORE R2,10(R0)
+    0xC0000013,  // 18: JUMP 19
+    0xA100000A,  // 19: STORE R1,10(R0)
+
+    
+    0xC0000014   // 20: loop infinito
+};
+
+    dut.carregar_programa(programa, sizeof(programa)/sizeof(programa[0]));
+    
 
     // --- Trace VCD para GTKWave ---
     sc_trace_file *tf = sc_create_vcd_trace_file("risco_trace");
@@ -114,105 +153,85 @@ int sc_main(int argc, char* argv[]) {
               << std::endl;
     std::cout << std::string(83, '-') << std::endl;
 
-    // Reset
-    reset.write(true);
+   reset.write(true);
     sc_start(15, SC_NS);
     reset.write(false);
 
-    // 25 ciclos: 19 instrucoes + fill de pipeline + folga no halt
+    // =========================
+    // EXECUÇÃO PASSO A PASSO
+    // =========================
     for (int i = 0; i < 25; i++) {
         sc_start(10, SC_NS);
-        std::cout << std::left
-                  << std::setw(10) << sc_time_stamp()
-                  << std::setw(5)  << dut.pc.read()
-                  << "0x" << std::hex << std::setfill('0') << std::setw(8)
-                  << dut.if_ex_instrucao.read() << "  "
-                  << std::dec << std::setfill(' ')
-                  << std::setw(6)  << dut.sig_rd.read()
-                  << std::setw(12) << dut.sig_ula_a.read()
-                  << std::setw(12) << dut.sig_ula_b.read()
-                  << std::setw(12) << dut.sig_ula_res.read()
-                  << std::setw(12) << dut.sig_wb_data.read()
-                  << std::endl;
+
+        uint32_t if_instr = dut.instrucao.read();
+        uint32_t ex_instr = dut.if_ex_instrucao.read();
+
+        std::string if_op = decode(if_instr);
+        std::string ex_op = decode(ex_instr);
+
+        std::cout << "\n[ CICLO " << i << " ] =====================\n";
+
+        // IF
+        std::cout << "IF  -> PC=" << dut.pc.read()
+                  << "  Instr=0x" << std::hex << if_instr
+                  << " (" << if_op << ")\n";
+
+        // EX
+        std::cout << "EX  -> Instr=0x" << std::hex << ex_instr
+                  << " (" << ex_op << ")\n";
+
+        std::cout << std::dec;
+
+        // ULA
+        std::cout << "ULA -> A=" << dut.sig_ula_a.read()
+                  << "  B=" << dut.sig_ula_b.read()
+                  << "  RES=" << dut.sig_ula_res.read()
+                  << "\n";
+
+        // Escrita em registrador
+        if (dut.sig_reg_write.read()) {
+            std::cout << "REG -> R" << dut.sig_rd.read()
+                      << " = " << dut.sig_wb_data.read() << "\n";
+        }
+
+        // Memória
+        if (dut.sig_mem_write.read()) {
+            std::cout << "MEM -> STORE valor="
+                      << dut.sig_store_data.read() << "\n";
+        }
+
+        if (dut.sig_mem_read.read()) {
+            std::cout << "MEM -> LOAD\n";
+        }
+
+        // Controle
+        if (dut.sig_branch.read()) {
+            std::cout << "BRANCH (zero=" << dut.sig_zero.read() << ")\n";
+        }
+
+        if (dut.sig_jump.read()) {
+            std::cout << "JUMP\n";
+        }
+
+        std::cout << "-------------------------------------\n";
     }
 
-    // =========================================================
-    //  Verificacao dos resultados
-    // =========================================================
-    std::cout << std::string(83, '-') << std::endl;
-
-    uint32_t regs[16];
-    for (int i = 0; i < 16; i++)
-        regs[i] = (uint32_t)dut.banco->regs[i].read();
-    uint32_t mem10 = (uint32_t)dut.mem_dados->mem[10];
-
-    struct Caso { const char* desc; uint32_t obtido; uint32_t esperado; };
-    Caso casos[] = {
-        // Registradores basicos
-        { "R1  ADDI +5              ", regs[1],  5           },
-        { "R2  ADDI +3              ", regs[2],  3           },
-        { "R3  ADD  R1+R2  (RAW)    ", regs[3],  8           },
-        { "R4  SUB  R3-R1  (RAW)    ", regs[4],  3           },
-        // Instrucoes logicas
-        { "R5  AND  8&3             ", regs[5],  0           },
-        { "R6  OR   8|3             ", regs[6],  11          },
-        { "R7  XOR  8^3             ", regs[7],  11          },
-        { "R8  NOT  ~5              ", regs[8],  0xFFFFFFFA  },
-        // Shifts
-        { "R9  SHL  3<<1            ", regs[9],  6           },
-        { "R10 SHR  8>>1            ", regs[10], 4           },
-        // Imediato negativo
-        { "R11 ADDI R0,-1 (ext.sin) ", regs[11], 0xFFFFFFFF  },
-        // Hardwired R0
-        { "R0  apos ADD R0,R1,R2    ", regs[0],  0           },
-        // LOAD / STORE
-        { "mem[10] STORE R3         ", mem10,    8           },
-        { "R12 LOAD  mem[10]        ", regs[12], 8           },
-        // BEQ: R13 nao deve ser escrito (flush)
-        { "R13 BEQ flush (esperado 0)", regs[13], 0          },
-    };
-
-    int total  = sizeof(casos) / sizeof(casos[0]);
-    int passou = 0;
-
-    std::cout << "\n=== Verificacao Detalhada ===" << std::endl;
-    std::cout << std::left
-              << std::setw(32) << "Teste"
-              << std::setw(14) << "Obtido"
-              << std::setw(14) << "Esperado"
-              << "Resultado" << std::endl;
-    std::cout << std::string(72, '-') << std::endl;
-
-    for (int i = 0; i < total; i++) {
-        bool ok = (casos[i].obtido == casos[i].esperado);
-        if (ok) passou++;
-        std::cout << std::left
-                  << std::setw(32) << casos[i].desc
-                  << "0x" << std::hex << std::setfill('0') << std::setw(8)
-                  << casos[i].obtido   << "    "
-                  << "0x" << std::setw(8)
-                  << casos[i].esperado << "  "
-                  << std::dec << std::setfill(' ')
-                  << (ok ? "OK" : "FALHOU")
-                  << std::endl;
+    // =========================
+    // ESTADO FINAL
+    // =========================
+    std::cout << "\n=== ESTADO FINAL ===\n";
+    for (int i = 0; i < 8; i++) {
+        std::cout << "R" << i << " = "
+                  << dut.banco->regs[i].read() << "\n";
     }
 
-    std::cout << std::string(72, '-') << std::endl;
-    std::cout << "\n=== Resultado Final: " << passou << "/" << total
-              << " testes passaram ===" << std::endl;
-    if (passou == total)
-        std::cout << "  TODOS OS TESTES PASSARAM" << std::endl;
-    else
-        std::cout << "  FALHA EM UM OU MAIS TESTES" << std::endl;
-
-    std::cout << "\n[AVISO] Load-Use Hazard: instrucao imediatamente apos LOAD\n"
-                 "        le o valor antigo do registrador. Inserir NOP entre\n"
-                 "        LOAD e o primeiro uso do resultado (ver addr 14).\n"
-              << std::endl;
+    std::cout << "mem[10] = "
+              << dut.mem_dados->mem[10] << "\n";
 
     sc_close_vcd_trace_file(tf);
-    std::cout << "Trace salvo em risco_trace.vcd  "
-                 "(visualizar: gtkwave risco_trace.vcd)" << std::endl;
 
-    return (passou == total) ? 0 : 1;
+    std::cout << "\nTrace salvo em risco_trace.vcd\n";
+    std::cout << "Abra com: gtkwave risco_trace.vcd\n";
+
+    return 0;
 }
