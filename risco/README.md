@@ -75,16 +75,6 @@ sudo apt update
 sudo apt install libsystemc-dev
 ```
 
-### Compilar
-```bash
-make
-```
-
-### Executar simulação
-```bash
-make run
-```
-
 ### Visualizar formas de onda (requer GTKWave)
 ```bash
 sudo apt install gtkwave
