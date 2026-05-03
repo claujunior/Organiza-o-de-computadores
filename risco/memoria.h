@@ -3,8 +3,12 @@
 
 #include <systemc.h>
 
-// Memória unificada de 256 palavras de 32 bits (1KB)
-// Endereçamento por palavra
+// Memória genérica de 256 palavras de 32 bits (1KB)
+// Endereçamento por palavra (word-addressed)
+//
+// CORREÇÃO:
+//   dado_saida agora escreve 0 quando leitura=false, eliminando o
+//   comportamento de latch que mantinha o último valor lido na saída.
 
 SC_MODULE(Memoria) {
     sc_in<sc_uint<32>> endereco;
@@ -31,10 +35,9 @@ SC_MODULE(Memoria) {
     void ler() {
         if (leitura.read()) {
             sc_uint<32> addr = endereco.read();
-            if (addr < 256)
-                dado_saida.write(mem[addr]);
-            else
-                dado_saida.write(0);
+            dado_saida.write(addr < 256 ? mem[addr] : sc_uint<32>(0));
+        } else {
+            dado_saida.write(0);  // sem comportamento de latch
         }
     }
 
@@ -47,7 +50,7 @@ SC_MODULE(Memoria) {
         }
     }
 
-    // Método auxiliar para carregar programa
+    // Carrega programa/dados na memória antes da simulação
     void carregar(sc_uint<32> instrucoes[], int n) {
         for (int i = 0; i < n && i < 256; i++)
             mem[i] = instrucoes[i];

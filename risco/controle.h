@@ -10,22 +10,22 @@
  *  [31-28] opcode | [27-24] rd | [23-20] rs1 | [19-16] rs2 | [15-0] não usado
  *
  * Tipo I (imediato):
- *  [31-28] opcode | [27-24] rd | [23-20] rs1 | [19-0] imediato (20 bits)
+ *  [31-28] opcode | [27-24] rd | [23-20] rs1 | [19-0] imediato (20 bits, com sinal)
  *
  * Opcodes:
- *  0000 = ADD   (R)
- *  0001 = SUB   (R)
- *  0010 = AND   (R)
- *  0011 = OR    (R)
- *  0100 = XOR   (R)
- *  0101 = NOT   (R)
- *  0110 = SHL   (R)
- *  0111 = SHR   (R)
- *  1000 = ADDI  (I) — ADD imediato
- *  1001 = LOAD  (I) — mem[rs1 + imm] → rd
- *  1010 = STORE (I) — rd → mem[rs1 + imm]
- *  1011 = BEQ   (I) — branch se rd == rs1
- *  1100 = JUMP  (I) — PC ← imm
+ *  0000 = ADD   (R) — rd = rs1 + rs2
+ *  0001 = SUB   (R) — rd = rs1 - rs2
+ *  0010 = AND   (R) — rd = rs1 & rs2
+ *  0011 = OR    (R) — rd = rs1 | rs2
+ *  0100 = XOR   (R) — rd = rs1 ^ rs2
+ *  0101 = NOT   (R) — rd = ~rs1
+ *  0110 = SHL   (R) — rd = rs1 << 1
+ *  0111 = SHR   (R) — rd = rs1 >> 1
+ *  1000 = ADDI  (I) — rd = rs1 + sign_extend(imm)
+ *  1001 = LOAD  (I) — rd = mem[rs1 + sign_extend(imm)]
+ *  1010 = STORE (I) — mem[rs1 + sign_extend(imm)] = rd
+ *  1011 = BEQ   (I) — if (rd == rs1) PC += sign_extend(imm)
+ *  1100 = JUMP  (I) — PC = sign_extend(imm)  [salto absoluto]
  */
 
 SC_MODULE(UnidadeControle) {
@@ -39,14 +39,14 @@ SC_MODULE(UnidadeControle) {
     sc_out<sc_uint<20>> imediato;
 
     // Sinais de controle
-    sc_out<bool> reg_write;    // Habilita escrita no banco de reg
-    sc_out<bool> mem_read;     // Leitura de memória
-    sc_out<bool> mem_write;    // Escrita em memória
-    sc_out<bool> mem_to_reg;   // Resultado vem da memória (LOAD)
-    sc_out<bool> use_imm;      // ULA usa imediato em vez de rs2
-    sc_out<bool> branch;       // Instrução de branch
-    sc_out<bool> jump;         // Instrução de jump
-    sc_out<sc_uint<4>> ula_op; // Operação da ULA
+    sc_out<bool>       reg_write;   // Habilita escrita no banco
+    sc_out<bool>       mem_read;    // Leitura de memória de dados
+    sc_out<bool>       mem_write;   // Escrita em memória de dados
+    sc_out<bool>       mem_to_reg;  // WB vem da memória (LOAD)
+    sc_out<bool>       use_imm;     // ULA usa imediato em vez de rs2
+    sc_out<bool>       branch;      // Instrução de branch (BEQ)
+    sc_out<bool>       jump;        // Instrução de jump (JUMP)
+    sc_out<sc_uint<4>> ula_op;      // Operação da ULA
 
     SC_CTOR(UnidadeControle) {
         SC_METHOD(decodificar);
@@ -79,7 +79,6 @@ SC_MODULE(UnidadeControle) {
         ula_op.write(0);
 
         switch (op) {
-            // Tipo R — operações ULA
             case 0x0: // ADD
             case 0x1: // SUB
             case 0x2: // AND
@@ -106,18 +105,20 @@ SC_MODULE(UnidadeControle) {
                 ula_op.write(0x0); // ADD para calcular endereço
                 break;
 
-            case 0xA: // STORE
+            case 0xA: // STORE — mem[rs1 + imm] = rd
                 mem_write.write(true);
                 use_imm.write(true);
                 ula_op.write(0x0); // ADD para calcular endereço
                 break;
 
-            case 0xB: // BEQ
+            case 0xB: // BEQ — if (rd == rs1) PC += imm
+                // O Datapath usa o terceiro porto do banco para ler rd,
+                // e compara com rs1_data via SUB na ULA.
                 branch.write(true);
-                ula_op.write(0x1); // SUB para comparar
+                ula_op.write(0x1); // SUB para comparar (zero flag)
                 break;
 
-            case 0xC: // JUMP
+            case 0xC: // JUMP — PC = imm (salto absoluto)
                 jump.write(true);
                 break;
 
