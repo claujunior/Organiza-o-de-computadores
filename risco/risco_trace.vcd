@@ -1,5 +1,9 @@
 $date
+<<<<<<< HEAD
      May 03, 2026       17:42:03
+=======
+     May 03, 2026       17:36:24
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 $end
 
 $version
@@ -21,6 +25,7 @@ $var wire    4  aaaag  rs1 [3:0]  $end
 $var wire    4  aaaah  rs2 [3:0]  $end
 $var wire   32  aaaai  rs1_data [31:0]  $end
 $var wire   32  aaaaj  rs2_data [31:0]  $end
+<<<<<<< HEAD
 $var wire   32  aaaak  rd_read_data [31:0]  $end
 $var wire   32  aaaal  ula_A [31:0]  $end
 $var wire   32  aaaam  ula_B [31:0]  $end
@@ -31,6 +36,14 @@ $var wire    1  aaaaq  reg_write       $end
 $var wire    1  aaaar  mem_read       $end
 $var wire    1  aaaas  mem_write       $end
 $var wire   32  aaaat  store_data [31:0]  $end
+=======
+$var wire   32  aaaak  ula_resultado [31:0]  $end
+$var wire    1  aaaal  flag_zero       $end
+$var wire   32  aaaam  wb_data [31:0]  $end
+$var wire    1  aaaan  reg_write       $end
+$var wire    1  aaaao  mem_read       $end
+$var wire    1  aaaap  mem_write       $end
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 $upscope $end
 $enddefinitions  $end
 
@@ -50,6 +63,7 @@ b0 aaaah
 b0 aaaai
 b0 aaaaj
 b0 aaaak
+<<<<<<< HEAD
 b0 aaaal
 b0 aaaam
 b0 aaaan
@@ -59,6 +73,13 @@ b0 aaaap
 0aaaar
 0aaaas
 b0 aaaat
+=======
+1aaaal
+b0 aaaam
+1aaaan
+0aaaao
+0aaaap
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 $end
 
 #5000
@@ -77,10 +98,16 @@ b1 aaaac
 b10000010000000000000000000000011 aaaad
 b10000001000000000000000000000101 aaaae
 b1 aaaaf
+<<<<<<< HEAD
 b101 aaaam
 b101 aaaan
 0aaaao
 b101 aaaap
+=======
+b101 aaaak
+0aaaal
+b101 aaaam
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #25000
 0aaaaa
@@ -91,9 +118,14 @@ b10 aaaac
 b11000100100000000000000000 aaaad
 b10000010000000000000000000000011 aaaae
 b10 aaaaf
+<<<<<<< HEAD
 b11 aaaam
 b11 aaaan
 b11 aaaap
+=======
+b11 aaaak
+b11 aaaam
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #35000
 0aaaaa
@@ -101,17 +133,26 @@ b11 aaaap
 #40000
 1aaaaa
 b11 aaaac
+<<<<<<< HEAD
 b10000100001100000000000000001010 aaaad
+=======
+b10100011000000000000000001100100 aaaad
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 b11000100100000000000000000 aaaae
 b11 aaaaf
 b1 aaaag
 b10 aaaah
 b101 aaaai
 b11 aaaaj
+<<<<<<< HEAD
 b101 aaaal
 b1000 aaaan
 b1000 aaaap
 b11 aaaat
+=======
+b1000 aaaak
+b1000 aaaam
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #45000
 0aaaaa
@@ -119,6 +160,7 @@ b11 aaaat
 #50000
 1aaaaa
 b100 aaaac
+<<<<<<< HEAD
 b10100011000000000000000001100100 aaaad
 b10000100001100000000000000001010 aaaae
 b100 aaaaf
@@ -131,6 +173,18 @@ b1010 aaaam
 b10010 aaaan
 b10010 aaaap
 b0 aaaat
+=======
+b11000000000000000000000000000100 aaaad
+b10100011000000000000000001100100 aaaae
+b0 aaaag
+b11 aaaah
+b0 aaaai
+b1000 aaaaj
+b1100100 aaaak
+b1100100 aaaam
+0aaaan
+1aaaap
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #55000
 0aaaaa
@@ -138,6 +192,7 @@ b0 aaaat
 #60000
 1aaaaa
 b101 aaaac
+<<<<<<< HEAD
 b10010101000000000000000001100100 aaaad
 b10100011000000000000000001100100 aaaae
 b11 aaaaf
@@ -151,12 +206,24 @@ b1100100 aaaap
 0aaaaq
 1aaaas
 b1000 aaaat
+=======
+b0 aaaad
+b11000000000000000000000000000100 aaaae
+b0 aaaaf
+b0 aaaah
+b0 aaaaj
+b0 aaaak
+1aaaal
+b0 aaaam
+0aaaap
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #65000
 0aaaaa
 
 #70000
 1aaaaa
+<<<<<<< HEAD
 b110 aaaac
 b10110010000010000000000000000 aaaad
 b10010101000000000000000001100100 aaaae
@@ -167,12 +234,19 @@ b1000 aaaap
 1aaaar
 0aaaas
 b0 aaaat
+=======
+b100 aaaac
+b11000000000000000000000000000100 aaaad
+b0 aaaae
+1aaaan
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #75000
 0aaaaa
 
 #80000
 1aaaaa
+<<<<<<< HEAD
 b111 aaaac
 b11000000000000000000000000000111 aaaad
 b10110010000010000000000000000 aaaae
@@ -187,12 +261,19 @@ b1101 aaaan
 b1101 aaaap
 0aaaar
 b101 aaaat
+=======
+b101 aaaac
+b0 aaaad
+b11000000000000000000000000000100 aaaae
+0aaaan
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #85000
 0aaaaa
 
 #90000
 1aaaaa
+<<<<<<< HEAD
 b1000 aaaac
 b0 aaaad
 b11000000000000000000000000000111 aaaae
@@ -208,26 +289,39 @@ b0 aaaan
 b0 aaaap
 0aaaaq
 b0 aaaat
+=======
+b100 aaaac
+b0 aaaae
+1aaaan
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #95000
 0aaaaa
 
 #100000
 1aaaaa
+<<<<<<< HEAD
 b111 aaaac
 b11000000000000000000000000000111 aaaad
 b0 aaaae
 1aaaaq
+=======
+b101 aaaac
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #105000
 0aaaaa
 
 #110000
 1aaaaa
+<<<<<<< HEAD
 b1000 aaaac
 b0 aaaad
 b11000000000000000000000000000111 aaaae
 0aaaaq
+=======
+b110 aaaac
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #115000
 0aaaaa
@@ -235,9 +329,12 @@ b11000000000000000000000000000111 aaaae
 #120000
 1aaaaa
 b111 aaaac
+<<<<<<< HEAD
 b11000000000000000000000000000111 aaaad
 b0 aaaae
 1aaaaq
+=======
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78
 
 #125000
 0aaaaa
@@ -245,6 +342,7 @@ b0 aaaae
 #130000
 1aaaaa
 b1000 aaaac
+<<<<<<< HEAD
 b0 aaaad
 b11000000000000000000000000000111 aaaae
 0aaaaq
@@ -290,3 +388,7 @@ b11000000000000000000000000000111 aaaae
 0aaaaq
 
 #175000
+=======
+
+#135000
+>>>>>>> 15a4b7cf7cd452d4b4eee1e6e3f45cecd01abc78

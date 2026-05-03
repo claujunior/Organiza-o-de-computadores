@@ -4,10 +4,10 @@ CXXFLAGS     = -std=c++17 -Wall -O2
 INCLUDES     = -I$(SYSTEMC_HOME)/include -I.
 LDFLAGS      = -L$(SYSTEMC_HOME)/lib-linux64 -lsystemc -lm
 
-# Detectar instalação 
-SYSTEMC_APT  = /usr/include/systemc
+# Detecta instalação via apt (systemc.h fica em /usr/include/systemc.h)
+SYSTEMC_APT  = /usr/include/systemc.h
 ifneq ($(wildcard $(SYSTEMC_APT)),)
-  INCLUDES   = -I/usr/include -I.
+  INCLUDES   = -I.
   LDFLAGS    = -lsystemc -lm
 endif
 

@@ -109,6 +109,8 @@ SC_MODULE(UnidadeControle) {
                 mem_write.write(true);
                 use_imm.write(true);
                 ula_op.write(0x0); // ADD para calcular endereço
+                // Dado a armazenar vem do 3º porto do banco (r3_data = regs[rd])
+                // diretamente no Datapath — rs2 não é sobrescrito aqui.
                 break;
 
             case 0xB: // BEQ — if (rd == rs1) PC += imm
