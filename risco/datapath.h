@@ -31,6 +31,7 @@ SC_MODULE(Datapath) {
     sc_signal<bool>        sig_reg_write, sig_mem_read, sig_mem_write;
     sc_signal<bool>        sig_mem_to_reg, sig_use_imm, sig_branch, sig_jump;
     sc_signal<sc_uint<4>>  sig_ula_op;
+    sc_signal<bool>        sig_instr_read;
 
     // Banco de registradores
     sc_signal<sc_uint<32>> sig_rs1_data, sig_rs2_data;
@@ -97,11 +98,12 @@ SC_MODULE(Datapath) {
         ula->carry(sig_carry);
         ula->negativo(sig_negativo);
 
-        // --- Memória de Instruções ---
+    // Memória de instruções
+        sig_instr_read.write(true);
         mem_instrucoes->clk(clk);
         mem_instrucoes->endereco(pc);
         mem_instrucoes->dado_entrada(sig_ula_res); // não usado
-        mem_instrucoes->leitura(reset);            // sempre lendo
+        mem_instrucoes->leitura(sig_instr_read);   // sempre lendo
         mem_instrucoes->escrita(sig_zero);         // nunca escrevendo
         mem_instrucoes->dado_saida(instrucao);
 

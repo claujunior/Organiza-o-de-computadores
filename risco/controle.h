@@ -110,11 +110,13 @@ SC_MODULE(UnidadeControle) {
                 mem_write.write(true);
                 use_imm.write(true);
                 ula_op.write(0x0); // ADD para calcular endereço
+                rs2.write(dst);      // dados vêm de rd para STORE
                 break;
 
             case 0xB: // BEQ
                 branch.write(true);
                 ula_op.write(0x1); // SUB para comparar
+                rs2.write(dst);      // compare rd com rs1
                 break;
 
             case 0xC: // JUMP

@@ -78,7 +78,7 @@ sudo apt install libsystemc-dev
 ### Visualizar formas de onda (requer GTKWave)
 ```bash
 sudo apt install gtkwave
-make wave
+
 ```
 
 ## Exemplo de Programa
