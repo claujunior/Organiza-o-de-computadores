@@ -72,42 +72,38 @@ int sc_main(int argc, char* argv[]) {
     //contador
     sc_uint<32> programa[] = {
 
-    // =========================
-    // 1. CONTADOR (executa algumas vezes)
-    // =========================
-    0x81000000,  //  0: ADDI R1, R0, 0
-    0x81100001,  //  1: ADDI R1, R1, 1
-    0x81100001,  //  2: ADDI R1, R1, 1
-    0x81100001,  //  3: ADDI R1, R1, 1
-    
+// CONTADOR
+0x81000000,
+0x81100001,
+0x81100001,
+0x81100001,
 
-    // =========================
-    // 2. MULTIPLICADOR (R3 = 5 * 3)
-    // =========================
-    0x81000005,  //  4: ADDI R1, R0, 5
-    0x82000003,  //  5: ADDI R2, R0, 3
-    0x83000000,  //  6: ADDI R3, R0, 0
+// MULTIPLICADOR
+0x81000005,
+0x82000003,
+0x83000000,
 
-    0xB2000004,  //  7: BEQ  R2,R0,4
-    0x03310000,  //  8: ADD  R3,R3,R1
-    0x822FFFFF,  //  9: ADDI R2,R2,-1
-    0xC0000007,  // 10: JUMP 7
+0xB2000004,  // sai do loop quando R2==0
+0x03310000,
+0x822FFFFF,
+0xC0000007,
 
-    // =========================
-    // 3. COMPARADOR (salva maior em mem[10])
-    // =========================
-    0x81000005,  // 11: ADDI R1,R0,5
-    0x82000003,  // 12: ADDI R2,R0,3
-    0x14210000,  // 13: SUB  R4,R1,R2
-    0xB4000002,  // 14: BEQ  R4,R0,2
-    0x15220000,  // 15: SUB  R5,R2,R1
-    0xB5000002,  // 16: BEQ  R5,R0,2
-    0xA200000A,  // 17: STORE R2,10(R0)
-    0xC0000013,  // 18: JUMP 19
-    0xA100000A,  // 19: STORE R1,10(R0)
+// =================
+// COMPARADOR
+// =================
+0x81000005,   // R1 = 5
+0x82000003,   // R2 = 3
+0x14210000,   // R4 = R1 - R2
+0xB4000002,   // se igual pula
+0xA100000A,   // STORE R1 (maior)
+0xC0000012,   // pula pro fim
+0xA100000A,   // STORE R1 (igual)
 
-    
-    0xC0000014   // 20: loop infinito
+// =================
+// HALT
+// =================
+0xC0000014
+
 };
 
     dut.carregar_programa(programa, sizeof(programa)/sizeof(programa[0]));
@@ -160,7 +156,7 @@ int sc_main(int argc, char* argv[]) {
     // =========================
     // EXECUÇÃO PASSO A PASSO
     // =========================
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 31; i++) {
         sc_start(10, SC_NS);
 
         uint32_t if_instr = dut.instrucao.read();
