@@ -27,21 +27,7 @@
 //  16  | BEQ  R1, R1, 1        | 0xB1100001   | BEQ TOMADO (5==5) -> PC=18
 //  17  | ADDI R13, R0, 99      | 0x8D000063   | DEVE SER IGNORADO (flush)
 //  18  | JUMP 18               | 0xC0000012   | Halt (loop infinito)
-//
-//  Resultados esperados:
-//    R0=0  R1=5  R2=3  R3=8  R4=3  R5=0  R6=11  R7=11
-//    R8=0xFFFFFFFA  R9=6  R10=4  R11=0xFFFFFFFF  R12=8  R13=0
-//    mem[10] = 8
-//
-//  LIMITACAO CONHECIDA — Load-Use Hazard:
-//    No pipeline de 2 estagios, o resultado de LOAD so esta disponivel no
-//    banco de registradores no ciclo seguinte ao da execucao do LOAD.
-//    Se a instrucao imediatamente apos um LOAD ler o registrador destino,
-//    ela lera o valor ANTIGO (hazard RAW sem forwarding).
-//    Solucao: inserir um NOP (ADD R0,R0,R0 = 0x00000000) entre o LOAD e
-//    o primeiro uso do registrador carregado.
-//    Exemplo aplicado: addr 13 (LOAD R12) seguido de addr 14 (NOP).
-// =============================================================================
+
 std::string decode(uint32_t instr) {
     uint8_t opcode = (instr >> 28) & 0xF;
 

@@ -81,26 +81,6 @@ sudo apt install gtkwave
 
 ```
 
-## Exemplo de Programa
-
-O testbench executa o seguinte programa:
-
-```asm
-ADDI R1, R0, 5     ; R1 = 5
-ADDI R2, R0, 3     ; R2 = 3
-ADD  R3, R1, R2    ; R3 = 8
-STORE R3, 100(R0)  ; mem[100] = 8
-JUMP 4             ; loop infinito
-```
-
-Saída esperada:
-```
-R1 = 5
-R2 = 3
-R3 = 8
-mem[100] = 8
-```
-
 ## Limitações Conhecidas do Pipeline
 
 ### Load-Use Hazard

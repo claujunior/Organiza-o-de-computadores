@@ -5,10 +5,7 @@
 
 // Memória genérica de 256 palavras de 32 bits (1KB)
 // Endereçamento por palavra (word-addressed)
-//
-// CORREÇÃO:
-//   dado_saida agora escreve 0 quando leitura=false, eliminando o
-//   comportamento de latch que mantinha o último valor lido na saída.
+
 
 SC_MODULE(Memoria) {
     sc_in<sc_uint<32>> endereco;
@@ -55,6 +52,6 @@ SC_MODULE(Memoria) {
         for (int i = 0; i < n && i < 256; i++)
             mem[i] = instrucoes[i];
     }
-};
+};// CORRIGIDO: usa r3_data para STORE
 
 #endif

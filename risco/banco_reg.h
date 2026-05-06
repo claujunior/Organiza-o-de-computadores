@@ -7,15 +7,6 @@
 // R0 é sempre 0
 // RA (R14) = registrador de retorno
 // RB (R15) = base pointer / stack pointer
-//
-// CORREÇÕES:
-//   [Bug 3] regs[] agora é sc_signal<sc_uint<32>> em vez de sc_uint<32> puro.
-//            leitura() fica na lista de sensibilidade de cada reg, garantindo
-//            que a saída seja atualizada imediatamente após escrita síncrona,
-//            eliminando o hazard RAW sem precisar de stall ou forwarding externo.
-//   [Bug 2] Terceiro porto de leitura (r3_addr / r3_data) adicionado para que
-//            o Datapath possa ler o registrador `rd` separadamente, necessário
-//            para STORE (dados a armazenar) e BEQ (comparação rd == rs1).
 
 SC_MODULE(BancoRegistradores) {
     // --- Portas de leitura ---

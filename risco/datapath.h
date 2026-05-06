@@ -10,29 +10,6 @@
 // =============================================================================
 //  Datapath — Pipeline 2 Estágios (IF / EX+MEM+WB)
 // =============================================================================
-//  CORREÇÕES APLICADAS:
-//
-//  [Bug 1] Memória de instruções: sinal de leitura estava conectado ao pino
-//          `reset` (lendo apenas durante reset) e escrita ao `zero` da ULA
-//          (poderia corromper instruções).
-//          FIX: sig_always_true  → leitura permanente da mem. de instruções
-//               sig_always_false → escrita nunca ocorre na mem. de instruções
-//
-//  [Bug 2] STORE armazenava sig_rs2_data em vez do valor do registrador `rd`.
-//          FIX: terceiro porto de leitura no banco (r3_addr / r3_data) lê `rd`.
-//               mux_store_data() seleciona r3_data quando mem_write=true.
-//
-//  [Bug 3] Hazard RAW: leitura() do banco não reativava quando regs[] mudava.
-//          FIX: regs[] virou sc_signal<sc_uint<32>> no banco; leitura() agora
-//               está na lista de sensibilidade de todos os registradores,
-//               atualizando as saídas automaticamente após qualquer escrita.
-//
-//  [Melhoria] Imediato com extensão de sinal (20 → 32 bits, signed).
-//             Permite offsets negativos em LOAD/STORE e branches para trás.
-//
-//  [Melhoria] BEQ corrigido: ULA A = r3_data (rd), ULA B = rs1_data.
-//             Resultado zero = (rd == rs1). mux_ula_a() realiza a seleção.
-// =============================================================================
 
 SC_MODULE(Datapath) {
     sc_in<bool> clk;
@@ -122,13 +99,13 @@ SC_MODULE(Datapath) {
         banco->clk(clk);
         banco->rs1_addr(sig_rs1);
         banco->rs2_addr(sig_rs2);
-        banco->r3_addr(sig_rd);          // [Bug 2] terceiro porto lê rd
+        banco->r3_addr(sig_rd);          
         banco->rd_addr(sig_rd);
         banco->rd_data(sig_wb_data);
         banco->we(sig_reg_write);
         banco->rs1_data(sig_rs1_data);
         banco->rs2_data(sig_rs2_data);
-        banco->r3_data(sig_rd_read_data); // [Bug 2] valor de rd disponível
+        banco->r3_data(sig_rd_read_data); 
 
         // --- ULA ---
         // Agora usa sig_ula_a (muxado) em vez de sig_rs1_data diretamente
@@ -141,19 +118,17 @@ SC_MODULE(Datapath) {
         ula->negativo(sig_negativo);
 
         // --- Memória de Instruções ---
-        // [Bug 1] leitura = always_true, escrita = always_false
         mem_instrucoes->clk(clk);
         mem_instrucoes->endereco(pc);
-        mem_instrucoes->dado_entrada(sig_ula_res); // não usado
-        mem_instrucoes->leitura(sig_always_true);  // CORRIGIDO: sempre habilitada
-        mem_instrucoes->escrita(sig_always_false); // CORRIGIDO: nunca escreve
+        mem_instrucoes->dado_entrada(sig_ula_res); 
+        mem_instrucoes->leitura(sig_always_true);  
+        mem_instrucoes->escrita(sig_always_false); 
         mem_instrucoes->dado_saida(instrucao);
 
         // --- Memória de Dados ---
-        // [Bug 2] dado_entrada agora vem de sig_store_data (muxado)
         mem_dados->clk(clk);
         mem_dados->endereco(sig_ula_res);
-        mem_dados->dado_entrada(sig_store_data);   // CORRIGIDO: usa r3_data para STORE
+        mem_dados->dado_entrada(sig_store_data);   
         mem_dados->leitura(sig_mem_read);
         mem_dados->escrita(sig_mem_write);
         mem_dados->dado_saida(sig_mem_data);
@@ -195,7 +170,7 @@ SC_MODULE(Datapath) {
     // =========================================================
     //  MUX: operando B da ULA
     //  BEQ:      B = rs1_data   (compara A=rd contra B=rs1)
-    //  use_imm:  B = sign_extend(imm)  [CORRIGIDO: com extensão de sinal]
+    //  use_imm:  B = sign_extend(imm)  
     //  padrão:   B = rs2_data
     // =========================================================
     void mux_ula_b() {
@@ -213,7 +188,7 @@ SC_MODULE(Datapath) {
 
     // =========================================================
     //  MUX: dado a escrever na memória de dados
-    //  STORE (mem_write=true): usa r3_data = regs[rd]   [Bug 2 corrigido]
+    //  STORE (mem_write=true): usa r3_data = regs[rd]  
     //  outros: usa rs2_data (não chega a ser escrito)
     // =========================================================
     void mux_store_data() {
@@ -235,7 +210,7 @@ SC_MODULE(Datapath) {
 
     // =========================================================
     //  Calcula próximo PC
-    //  JUMP:         PC = sign_extend(imm)     [salto absoluto]
+    //  JUMP:         PC = sign_extend(imm)     
     //  BEQ tomado:   PC = PC + sign_extend(imm)
     //  sequencial:   PC = PC + 1
     // =========================================================
