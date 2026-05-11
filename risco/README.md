@@ -2,7 +2,7 @@
 
 ## Arquitetura
 
-Implementação do **datapath básico** do processador RISCO.
+Implementação do **datapath básico** do processador RISCO (Inspirado no Intel 8086).
 
 ### Organização dos Módulos
 
@@ -78,7 +78,12 @@ sudo apt install libsystemc-dev
 ### Visualizar formas de onda (requer GTKWave)
 ```bash
 sudo apt install gtkwave
+```
 
+```bash
+cd risco
+make
+./risco_sim
 ```
 
 ## Limitações Conhecidas do Pipeline
